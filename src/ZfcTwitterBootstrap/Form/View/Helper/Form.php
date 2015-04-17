@@ -134,9 +134,45 @@ class Form extends AbstractHelper
             $label = "<legend>$label</legend>";
         }
 
+        $template = '';
+        if ($fieldset instanceof \Zend\Form\Element\Collection) {
+            $template = $this->renderTemplate($fieldset);
+        }
+
         return '<fieldset id="fieldset-' . $id . '" class="' . $class . '">'
             . $label
             . $this->render($fieldset)
+            . $template
             . '</fieldset>';
+    }
+
+    /**
+     * Only render a template
+     *
+     * @param  Collection $collection
+     * @return string
+     */
+    private function renderTemplate(\Zend\Form\Element\Collection $collection)
+    {
+        $escapeHtmlAttribHelper = $this->getEscapeHtmlAttr();
+        $templateMarkup         = '';
+
+        $elementOrFieldset = $collection->getTemplateElement();
+
+        if($elementOrFieldset instanceof ElementInterface) {
+            $templateMarkup .= $this->renderFieldset($elementOrFieldset);
+        }
+
+        return sprintf(
+            '<span data-template="%s"></span>',
+            $escapeHtmlAttribHelper($templateMarkup)
+        );
+    }
+
+    private $escapeHtmlAttrib = null;
+
+    private function getEscapeHtmlAttr()
+    {
+        return $this->escapeHtmlAttrib != null ? $this->escapeHtmlAttrib : new \Zend\View\Helper\EscapeHtmlAttr();
     }
 }
